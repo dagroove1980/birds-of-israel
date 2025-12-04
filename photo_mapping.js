@@ -13,7 +13,10 @@
 // };
 
 window.PHOTO_MAPPING = {
-    // Add your photo mappings here
+    // Eurasian Coot
+    "eurcoo": "https://www.instagram.com/p/DHFsGvVMFPm/",
+    
+    // Add more photo mappings here
     // Format: "speciesCode": "https://www.instagram.com/p/POST_ID/"
 };
 
