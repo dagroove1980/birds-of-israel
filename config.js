@@ -5,7 +5,7 @@ window.EBIRD_API_KEY = '553a159epmff';
 // Get your API key from: https://console.cloud.google.com/
 // Enable "Maps Static API" in your Google Cloud project
 // See GOOGLE_MAPS_SETUP.md for detailed instructions
-window.GOOGLE_MAPS_API_KEY = ''; // Add your Google Maps API key here
+window.GOOGLE_MAPS_API_KEY = 'AIzaSyC95IqeL0PxesXIwpAo6bejf1hA_WAb7xg';
 
 // Instagram Configuration
 // Add your Instagram username here
