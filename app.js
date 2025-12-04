@@ -235,6 +235,48 @@ async function loadSpeciesData(region = 'IL', days = 30) {
     }
 }
 
+// Convert decimal degrees to degrees/minutes/seconds format
+function decimalToDMS(decimal, isLatitude) {
+    const absolute = Math.abs(decimal);
+    const degrees = Math.floor(absolute);
+    const minutesFloat = (absolute - degrees) * 60;
+    const minutes = Math.floor(minutesFloat);
+    const seconds = (minutesFloat - minutes) * 60;
+    
+    let direction;
+    if (isLatitude) {
+        direction = decimal >= 0 ? 'N' : 'S';
+    } else {
+        direction = decimal >= 0 ? 'E' : 'W';
+    }
+    
+    return `${degrees}°${minutes}'${seconds.toFixed(1)}"${direction}`;
+}
+
+// Create Google Maps link from coordinates
+function createGoogleMapsLink(lat, lng) {
+    const latDMS = decimalToDMS(lat, true);
+    const lngDMS = decimalToDMS(lng, false);
+    
+    // URL encode the coordinates
+    const encodedLat = encodeURIComponent(latDMS);
+    const encodedLng = encodeURIComponent(lngDMS);
+    
+    // Create Google Maps place URL
+    return `https://www.google.com/maps/place/${encodedLat}+${encodedLng}/@${lat},${lng},15z/data=!4m4!3m3!8m2!3d${lat}!4d${lng}?entry=ttu`;
+}
+
+// Create map thumbnail using OpenStreetMap static map (free, no API key required)
+function createMapPreview(lat, lng) {
+    // Using OpenStreetMap static map service
+    // This creates a map preview image
+    const zoom = 15;
+    return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=${zoom}&size=400x300&markers=${lat},${lng},red-pushpin`;
+    
+    // Alternative: If you have a Google Maps API key, you can use:
+    // return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=15&size=400x300&maptype=roadmap&markers=color:red|label:H|${lat},${lng}&key=YOUR_API_KEY`;
+}
+
 // Load hotspots
 async function loadHotspots(region = 'IL') {
     const container = document.getElementById('hotspots-list');
@@ -259,6 +301,8 @@ async function loadHotspots(region = 'IL') {
             .slice(0, 30);
         
         sortedHotspots.forEach(hotspot => {
+            if (!hotspot.lat || !hotspot.lng) return; // Skip hotspots without coordinates
+            
             const card = document.createElement('div');
             card.className = 'hotspot-card';
             
@@ -270,12 +314,34 @@ async function loadHotspots(region = 'IL') {
                 })
                 : 'Unknown';
             
+            // Convert coordinates
+            const latDMS = decimalToDMS(hotspot.lat, true);
+            const lngDMS = decimalToDMS(hotspot.lng, false);
+            const googleMapsLink = createGoogleMapsLink(hotspot.lat, hotspot.lng);
+            const mapThumbnail = createMapPreview(hotspot.lat, hotspot.lng);
+            
             card.innerHTML = `
                 <h3>${hotspot.name}</h3>
+                <div class="hotspot-map-container">
+                    <a href="${googleMapsLink}" target="_blank" rel="noopener noreferrer" class="hotspot-map-link" title="Click to open in Google Maps">
+                        <img src="${mapThumbnail}" alt="Map of ${hotspot.name}" class="hotspot-map-thumbnail" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'%3E%3Crect fill=\'%23f0f0f0\' width=\'400\' height=\'300\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' fill=\'%23999\'%3EMap preview%3C/text%3E%3C/svg%3E';">
+                        <div class="hotspot-map-overlay">
+                            <span class="map-link-text">🗺️ Open in Google Maps</span>
+                        </div>
+                    </a>
+                </div>
                 <div class="hotspot-details">
                     <div class="detail-item">
-                        <span class="detail-label">📍 Location:</span>
-                        <span class="detail-value">${hotspot.lat}, ${hotspot.lng}</span>
+                        <span class="detail-label">📍 Coordinates:</span>
+                        <span class="detail-value">${latDMS} ${lngDMS}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">🗺️ Google Maps:</span>
+                        <span class="detail-value">
+                            <a href="${googleMapsLink}" target="_blank" rel="noopener noreferrer" class="google-maps-link">
+                                View on Google Maps →
+                            </a>
+                        </span>
                     </div>
                     ${hotspot.numSpeciesAllTime ? `
                     <div class="detail-item">

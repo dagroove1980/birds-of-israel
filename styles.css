@@ -325,12 +325,78 @@ select:focus {
     border-radius: 12px;
     box-shadow: var(--shadow);
     border: 1px solid var(--border-color);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.hotspot-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
 }
 
 .hotspot-card h3 {
     color: var(--primary-color);
     margin-bottom: 15px;
     font-size: 1.2em;
+}
+
+.hotspot-map-container {
+    position: relative;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.hotspot-map-link {
+    display: block;
+    position: relative;
+    text-decoration: none;
+    transition: transform 0.3s;
+}
+
+.hotspot-map-link:hover {
+    transform: scale(1.02);
+}
+
+.hotspot-map-thumbnail {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+}
+
+.hotspot-map-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    padding: 15px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.hotspot-map-link:hover .hotspot-map-overlay {
+    opacity: 1;
+}
+
+.map-link-text {
+    color: white;
+    font-weight: 600;
+    font-size: 0.9em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.google-maps-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.google-maps-link:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
 }
 
 .hotspot-details {
