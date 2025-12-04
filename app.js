@@ -3,30 +3,41 @@ const EBIRD_API_BASE = 'https://api.ebird.org/v2';
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if API key is configured
-    if (!window.EBIRD_API_KEY) {
-        const warning = document.getElementById('api-key-warning');
-        if (warning) {
-            warning.style.display = 'block';
+    // Wait a bit for config.js to load if it exists
+    setTimeout(() => {
+        // Check if API key is configured
+        if (!window.EBIRD_API_KEY) {
+            const warning = document.getElementById('api-key-warning');
+            if (warning) {
+                warning.style.display = 'block';
+            }
+            // Disable controls
+            const refreshBtn = document.getElementById('refreshBtn');
+            const searchBtn = document.getElementById('search-btn');
+            if (refreshBtn) refreshBtn.disabled = true;
+            if (searchBtn) searchBtn.disabled = true;
+            
+            // Show message in stats
+            document.getElementById('totalObservations').textContent = 'N/A';
+            document.getElementById('totalSpecies').textContent = 'N/A';
+            document.getElementById('totalChecklists').textContent = 'N/A';
+            document.getElementById('totalHotspots').textContent = 'N/A';
+            return;
         }
-        // Disable controls
-        document.getElementById('refreshBtn').disabled = true;
-        document.getElementById('search-btn').disabled = true;
-        return;
-    }
-    
-    initializeTabs();
-    loadData();
-    
-    document.getElementById('refreshBtn').addEventListener('click', loadData);
-    document.getElementById('days').addEventListener('change', loadData);
-    document.getElementById('region').addEventListener('change', loadData);
-    document.getElementById('search-btn').addEventListener('click', searchSpecies);
-    document.getElementById('species-search').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            searchSpecies();
-        }
-    });
+        
+        initializeTabs();
+        loadData();
+        
+        document.getElementById('refreshBtn').addEventListener('click', loadData);
+        document.getElementById('days').addEventListener('change', loadData);
+        document.getElementById('region').addEventListener('change', loadData);
+        document.getElementById('search-btn').addEventListener('click', searchSpecies);
+        document.getElementById('species-search').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchSpecies();
+            }
+        });
+    }, 100); // Small delay to ensure config.js loads
 });
 
 // Tab switching
