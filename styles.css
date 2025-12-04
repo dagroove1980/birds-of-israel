@@ -467,6 +467,7 @@ footer a:hover {
     align-items: center;
     justify-content: center;
     background: #fafafa;
+    position: relative;
 }
 
 .photo-loading {
@@ -474,15 +475,50 @@ footer a:hover {
     padding: 40px;
 }
 
+.photo-loading-spinner {
+    color: var(--text-secondary);
+    padding: 20px;
+    text-align: center;
+    font-size: 0.9em;
+}
+
 .instagram-embed {
     width: 100%;
     max-width: 100%;
     margin: 0 auto;
+    display: block;
 }
 
 .instagram-embed iframe {
     width: 100% !important;
     max-width: 100% !important;
+    border: none !important;
+    border-radius: 8px;
+}
+
+.observation-photo {
+    margin: 15px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fafafa;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.photo-placeholder {
+    width: 100%;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fafafa;
+}
+
+.instagram-fallback {
+    padding: 20px;
+    text-align: center;
 }
 
 .instagram-link {

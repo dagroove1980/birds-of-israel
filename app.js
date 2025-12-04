@@ -144,11 +144,9 @@ function createObservationCard(obs) {
     const photoUrl = window.PHOTO_MAPPING && window.PHOTO_MAPPING[obs.speciesCode];
     const photoSection = photoUrl ? `
         <div class="observation-photo">
-            <a href="${photoUrl}" target="_blank" rel="noopener noreferrer">
-                <div class="photo-placeholder" data-instagram-url="${photoUrl}">
-                    📸 View Photo on Instagram
-                </div>
-            </a>
+            <div class="photo-placeholder" data-instagram-url="${photoUrl}">
+                <div class="photo-loading-spinner">Loading photo...</div>
+            </div>
         </div>
     ` : '';
     
@@ -432,28 +430,46 @@ async function loadInstagramEmbed(container, instagramUrl) {
         
         const data = await response.json();
         
-        // Create embed container
-        const embedDiv = document.createElement('div');
-        embedDiv.className = 'instagram-embed';
-        embedDiv.innerHTML = data.html;
-        embedDiv.style.maxWidth = '100%';
-        
-        // Replace placeholder
-        container.parentElement.replaceChild(embedDiv, container);
+        // Replace placeholder content with embed HTML
+        container.innerHTML = data.html;
+        container.className = 'instagram-embed';
+        container.style.maxWidth = '100%';
         
         // Load Instagram's embed script if not already loaded
         if (!window.instgrm) {
             const script = document.createElement('script');
             script.src = 'https://www.instagram.com/embed.js';
             script.async = true;
+            script.onload = () => {
+                if (window.instgrm && window.instgrm.Embeds) {
+                    window.instgrm.Embeds.process();
+                }
+            };
             document.body.appendChild(script);
         } else {
-            window.instgrm.Embeds.process();
+            // Script already loaded, process embeds
+            if (window.instgrm.Embeds) {
+                window.instgrm.Embeds.process();
+            }
         }
+        
+        // Also process after a short delay to ensure script is ready
+        setTimeout(() => {
+            if (window.instgrm && window.instgrm.Embeds) {
+                window.instgrm.Embeds.process();
+            }
+        }, 500);
+        
     } catch (error) {
         console.error('Error loading Instagram embed:', error);
-        // Fallback: show link
-        container.innerHTML = `<a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="instagram-link">📸 View on Instagram</a>`;
+        // Fallback: show link with image preview if available
+        container.innerHTML = `
+            <div class="instagram-fallback">
+                <a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="instagram-link">
+                    📸 View Photo on Instagram
+                </a>
+            </div>
+        `;
     }
 }
 
@@ -529,7 +545,9 @@ async function loadPhotoGallery() {
             
             // Load Instagram embed
             const embedContainer = photoCard.querySelector('.photo-embed-container');
-            loadInstagramEmbed(embedContainer, species.photoUrl);
+            if (embedContainer) {
+                loadInstagramEmbed(embedContainer, species.photoUrl);
+            }
         });
         
     } catch (error) {
