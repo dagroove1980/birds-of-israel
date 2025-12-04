@@ -266,22 +266,24 @@ function createGoogleMapsLink(lat, lng) {
     return `https://www.google.com/maps/place/${encodedLat}+${encodedLng}/@${lat},${lng},15z/data=!4m4!3m3!8m2!3d${lat}!4d${lng}?entry=ttu`;
 }
 
-// Create map thumbnail - try multiple services for reliability
+// Create map thumbnail using Google Maps Static API or fallback
 function createMapPreview(lat, lng) {
     const zoom = 15;
     const size = '400x300';
     
-    // Try OpenStreetMap static map service first
+    // Use Google Maps Static API if API key is configured
+    if (window.GOOGLE_MAPS_API_KEY && window.GOOGLE_MAPS_API_KEY.trim() !== '') {
+        return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=${zoom}&size=${size}&maptype=roadmap&markers=color:red|label:H|${lat},${lng}&key=${window.GOOGLE_MAPS_API_KEY}&scale=2`;
+    }
+    
+    // Fallback to OpenStreetMap if no Google Maps API key
     // If this fails, the onerror handler will show a nice fallback
     return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=${zoom}&size=${size}&markers=${lat},${lng},red-pushpin&scale=2`;
     
-    // Alternative services (uncomment and add API keys if needed):
-    // 
-    // Mapbox (free tier available at mapbox.com):
-    // return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+ff0000(${lng},${lat})/${lng},${lat},${zoom}/${size}@2x?access_token=YOUR_MAPBOX_TOKEN`;
-    //
-    // Google Maps Static API (requires API key):
-    // return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=${zoom}&size=${size}&maptype=roadmap&markers=color:red|label:H|${lat},${lng}&key=YOUR_GOOGLE_API_KEY&scale=2`;
+    // Alternative: Mapbox (free tier available at mapbox.com):
+    // if (window.MAPBOX_ACCESS_TOKEN) {
+    //     return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+ff0000(${lng},${lat})/${lng},${lat},${zoom}/${size}@2x?access_token=${window.MAPBOX_ACCESS_TOKEN}`;
+    // }
 }
 
 // Load hotspots
