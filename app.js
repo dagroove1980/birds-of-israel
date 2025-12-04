@@ -3,6 +3,18 @@ const EBIRD_API_BASE = 'https://api.ebird.org/v2';
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
+    // Check if API key is configured
+    if (!window.EBIRD_API_KEY) {
+        const warning = document.getElementById('api-key-warning');
+        if (warning) {
+            warning.style.display = 'block';
+        }
+        // Disable controls
+        document.getElementById('refreshBtn').disabled = true;
+        document.getElementById('search-btn').disabled = true;
+        return;
+    }
+    
     initializeTabs();
     loadData();
     

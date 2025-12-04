@@ -94,13 +94,24 @@
             <div class="search-results" id="search-results"></div>
         </div>
 
+        <div id="api-key-warning" style="display: none; margin: 20px 30px; padding: 20px; background: #fff3cd; border-left: 4px solid #ffc107; color: #856404; border-radius: 8px;" class="error">
+            <h3 style="margin-top: 0;">🔑 API Key Required</h3>
+            <p>To use this app, you need to add your eBird API key:</p>
+            <ol style="margin: 10px 0; padding-left: 20px;">
+                <li>Get your API key from <a href="https://ebird.org/api/keygen" target="_blank">eBird API Key Generator</a></li>
+                <li>Create a file named <code>config.js</code> in this directory</li>
+                <li>Add: <code>window.EBIRD_API_KEY = 'your-api-key-here';</code></li>
+                <li>Refresh this page</li>
+            </ol>
+            <p><strong>For GitHub Pages:</strong> Since config.js is not included (for security), you'll need to fork this repository and add your own API key.</p>
+        </div>
         <footer>
             <p>Data provided by <a href="https://ebird.org" target="_blank">eBird</a></p>
             <p class="api-note">⚠️ Make sure to set your eBird API key in config.js</p>
         </footer>
     </div>
 
-    <script src="config.js"></script>
+    <script src="config.js" onerror="console.warn('config.js not found - API key not configured')"></script>
     <script src="app.js"></script>
 </body>
 </html>
