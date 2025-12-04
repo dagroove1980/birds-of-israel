@@ -1,5 +1,6 @@
 # API Configuration (contains sensitive keys)
-config.js
+# config.js - Removed from .gitignore to enable GitHub Pages
+# Note: API key will be visible in the repository
 
 # OS files
 .DS_Store
