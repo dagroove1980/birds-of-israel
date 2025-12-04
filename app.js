@@ -266,35 +266,22 @@ function createGoogleMapsLink(lat, lng) {
     return `https://www.google.com/maps/place/${encodedLat}+${encodedLng}/@${lat},${lng},15z/data=!4m4!3m3!8m2!3d${lat}!4d${lng}?entry=ttu`;
 }
 
-// Create map thumbnail using OpenStreetMap static map (free, no API key required)
+// Create map thumbnail - try multiple services for reliability
 function createMapPreview(lat, lng) {
-    // Using OpenStreetMap static map service
-    // This creates a map preview image
     const zoom = 15;
     const size = '400x300';
     
-    // Try multiple OpenStreetMap services for better reliability
-    // Service 1: staticmap.openstreetmap.de (primary)
-    const primaryUrl = `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=${zoom}&size=${size}&markers=${lat},${lng},red-pushpin`;
+    // Try OpenStreetMap static map service first
+    // If this fails, the onerror handler will show a nice fallback
+    return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=${zoom}&size=${size}&markers=${lat},${lng},red-pushpin&scale=2`;
     
-    // Service 2: Alternative OSM tile service (fallback)
-    // Using a tile-based approach that's more reliable
-    const tileZoom = Math.min(zoom, 18);
-    const tileSize = 256;
-    const n = Math.pow(2, tileZoom);
-    const x = Math.floor((lng + 180) / 360 * n);
-    const latRad = lat * Math.PI / 180;
-    const y = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n);
-    
-    // Return primary URL - if it fails, the onerror handler will show fallback
-    return primaryUrl;
-    
-    // Alternative services if the above doesn't work:
-    // Option 1: Using Mapbox (requires free API key)
-    // return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+ff0000(${lng},${lat})/${lng},${lat},${zoom}/${size}?access_token=YOUR_MAPBOX_TOKEN`;
-    
-    // Option 2: Using Google Maps Static API (requires API key)
-    // return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=${zoom}&size=${size}&maptype=roadmap&markers=color:red|label:H|${lat},${lng}&key=YOUR_GOOGLE_API_KEY`;
+    // Alternative services (uncomment and add API keys if needed):
+    // 
+    // Mapbox (free tier available at mapbox.com):
+    // return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+ff0000(${lng},${lat})/${lng},${lat},${zoom}/${size}@2x?access_token=YOUR_MAPBOX_TOKEN`;
+    //
+    // Google Maps Static API (requires API key):
+    // return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=${zoom}&size=${size}&maptype=roadmap&markers=color:red|label:H|${lat},${lng}&key=YOUR_GOOGLE_API_KEY&scale=2`;
 }
 
 // Load hotspots
@@ -352,11 +339,14 @@ async function loadHotspots(region = 'IL') {
                 <h3>${hotspotName}</h3>
                 <div class="hotspot-map-container">
                     <a href="${googleMapsLink}" target="_blank" rel="noopener noreferrer" class="hotspot-map-link" title="Click to open in Google Maps">
-                        <img src="${mapThumbnail}" alt="Map of ${hotspotName}" class="hotspot-map-thumbnail" loading="lazy" 
-                             onerror="console.error('Map image failed:', this.src); this.onerror=null; this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';">
-                        <div class="hotspot-map-fallback" style="display: none; padding: 40px; text-align: center; background: #f0f0f0; border-radius: 8px; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                            <p style="margin: 0 0 10px 0; color: #666;">🗺️ Map preview unavailable</p>
-                            <a href="${googleMapsLink}" target="_blank" rel="noopener noreferrer" class="google-maps-link">View on Google Maps →</a>
+                        <div class="hotspot-map-wrapper">
+                            <img src="${mapThumbnail}" alt="Map of ${hotspotName}" class="hotspot-map-thumbnail" loading="lazy" 
+                                 onerror="handleMapImageError(this, '${googleMapsLink}');">
+                            <div class="hotspot-map-fallback" style="display: none; padding: 40px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white;">
+                                <p style="margin: 0 0 15px 0; font-size: 1.1em;">🗺️</p>
+                                <p style="margin: 0 0 10px 0; font-weight: 600;">Map Preview</p>
+                                <a href="${googleMapsLink}" target="_blank" rel="noopener noreferrer" style="color: white; text-decoration: underline; font-weight: 600;">View on Google Maps →</a>
+                            </div>
                         </div>
                         <div class="hotspot-map-overlay">
                             <span class="map-link-text">🗺️ Open in Google Maps</span>
@@ -501,6 +491,16 @@ async function fetchEBirdData(endpoint, params = {}) {
     } catch (e) {
         // If parsing fails, it might be CSV - show first few characters for debugging
         throw new Error(`Failed to parse JSON response. Response starts with: ${text.substring(0, 50)}...`);
+    }
+}
+
+// Handle map image error
+function handleMapImageError(imgElement, googleMapsLink) {
+    console.log('Map image failed to load, showing fallback');
+    imgElement.style.display = 'none';
+    const fallback = imgElement.parentElement.querySelector('.hotspot-map-fallback');
+    if (fallback) {
+        fallback.style.display = 'flex';
     }
 }
 

@@ -345,6 +345,7 @@ select:focus {
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    min-height: 200px;
 }
 
 .hotspot-map-link {
@@ -358,11 +359,20 @@ select:focus {
     transform: scale(1.02);
 }
 
+.hotspot-map-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 200px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
 .hotspot-map-thumbnail {
     width: 100%;
     height: auto;
     display: block;
     border-radius: 8px;
+    min-height: 200px;
+    object-fit: cover;
 }
 
 .hotspot-map-overlay {
