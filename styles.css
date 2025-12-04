@@ -553,6 +553,7 @@ footer a:hover {
     max-width: 100%;
     margin: 0 auto;
     display: block;
+    min-height: 400px;
 }
 
 .instagram-embed iframe {
@@ -560,6 +561,7 @@ footer a:hover {
     max-width: 100% !important;
     border: none !important;
     border-radius: 8px;
+    display: block;
 }
 
 .observation-photo {

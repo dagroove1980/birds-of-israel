@@ -485,21 +485,42 @@ function showError(message) {
 
 // Load Instagram oEmbed
 async function loadInstagramEmbed(container, instagramUrl) {
+    if (!container) {
+        console.error('Container not found for Instagram embed');
+        return;
+    }
+    
     try {
-        // Use Instagram oEmbed API
+        // Use Instagram oEmbed API with CORS proxy or direct call
+        // Instagram oEmbed API: https://api.instagram.com/oembed/?url=POST_URL
         const oembedUrl = `https://api.instagram.com/oembed/?url=${encodeURIComponent(instagramUrl)}&omitscript=true`;
-        const response = await fetch(oembedUrl);
+        
+        console.log('Loading Instagram embed for:', instagramUrl);
+        
+        const response = await fetch(oembedUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
         
         if (!response.ok) {
-            throw new Error('Failed to load Instagram embed');
+            console.error('Instagram oEmbed API error:', response.status, response.statusText);
+            throw new Error(`Instagram API error: ${response.status}`);
         }
         
         const data = await response.json();
+        console.log('Instagram oEmbed data received:', data);
+        
+        if (!data.html) {
+            throw new Error('No HTML in Instagram oEmbed response');
+        }
         
         // Replace placeholder content with embed HTML
         container.innerHTML = data.html;
         container.className = 'instagram-embed';
         container.style.maxWidth = '100%';
+        container.style.width = '100%';
         
         // Load Instagram's embed script if not already loaded
         if (!window.instgrm) {
@@ -507,35 +528,75 @@ async function loadInstagramEmbed(container, instagramUrl) {
             script.src = 'https://www.instagram.com/embed.js';
             script.async = true;
             script.onload = () => {
+                console.log('Instagram embed script loaded');
                 if (window.instgrm && window.instgrm.Embeds) {
                     window.instgrm.Embeds.process();
                 }
             };
+            script.onerror = () => {
+                console.error('Failed to load Instagram embed script');
+            };
             document.body.appendChild(script);
         } else {
             // Script already loaded, process embeds
+            console.log('Instagram script already loaded, processing embeds');
             if (window.instgrm.Embeds) {
                 window.instgrm.Embeds.process();
             }
         }
         
-        // Also process after a short delay to ensure script is ready
+        // Process embeds multiple times to ensure they render
         setTimeout(() => {
             if (window.instgrm && window.instgrm.Embeds) {
                 window.instgrm.Embeds.process();
             }
         }, 500);
         
+        setTimeout(() => {
+            if (window.instgrm && window.instgrm.Embeds) {
+                window.instgrm.Embeds.process();
+            }
+        }, 1500);
+        
     } catch (error) {
         console.error('Error loading Instagram embed:', error);
-        // Fallback: show link with image preview if available
-        container.innerHTML = `
-            <div class="instagram-fallback">
-                <a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="instagram-link">
-                    📸 View Photo on Instagram
-                </a>
-            </div>
-        `;
+        console.error('Instagram URL:', instagramUrl);
+        
+        // Fallback: Create an iframe embed directly (more reliable)
+        // Extract post ID from URL
+        const postIdMatch = instagramUrl.match(/\/p\/([^\/\?]+)/);
+        if (postIdMatch) {
+            const postId = postIdMatch[1];
+            const iframeSrc = `https://www.instagram.com/p/${postId}/embed/`;
+            
+            console.log('Using iframe fallback for post:', postId);
+            
+            container.innerHTML = `
+                <iframe 
+                    src="${iframeSrc}" 
+                    width="100%" 
+                    height="600" 
+                    frameborder="0" 
+                    scrolling="no" 
+                    allowtransparency="true"
+                    style="border-radius: 8px; max-width: 100%; display: block;"
+                    loading="lazy"
+                    title="Instagram post">
+                </iframe>
+            `;
+            container.className = 'instagram-embed';
+            container.style.width = '100%';
+        } else {
+            console.error('Could not extract post ID from URL:', instagramUrl);
+            // Final fallback: show link
+            container.innerHTML = `
+                <div class="instagram-fallback">
+                    <a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="instagram-link">
+                        📸 View Photo on Instagram
+                    </a>
+                </div>
+            `;
+        }
     }
 }
 
