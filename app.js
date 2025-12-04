@@ -271,10 +271,18 @@ function createMapPreview(lat, lng) {
     // Using OpenStreetMap static map service
     // This creates a map preview image
     const zoom = 15;
-    return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=${zoom}&size=400x300&markers=${lat},${lng},red-pushpin`;
+    const size = '400x300';
     
-    // Alternative: If you have a Google Maps API key, you can use:
-    // return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=15&size=400x300&maptype=roadmap&markers=color:red|label:H|${lat},${lng}&key=YOUR_API_KEY`;
+    // Try OpenStreetMap static map service
+    // Format: center=lat,lng&zoom=level&size=widthxheight&markers=lat,lng,icon
+    return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=${zoom}&size=${size}&markers=${lat},${lng},red-pushpin`;
+    
+    // Alternative services if the above doesn't work:
+    // Option 1: Using Mapbox (requires free API key)
+    // return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+ff0000(${lng},${lat})/${lng},${lat},${zoom}/${size}?access_token=YOUR_MAPBOX_TOKEN`;
+    
+    // Option 2: Using Google Maps Static API (requires API key)
+    // return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=${zoom}&size=${size}&maptype=roadmap&markers=color:red|label:H|${lat},${lng}&key=YOUR_GOOGLE_API_KEY`;
 }
 
 // Load hotspots
