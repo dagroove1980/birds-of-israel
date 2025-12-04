@@ -309,7 +309,12 @@ async function loadHotspots(region = 'IL') {
             .slice(0, 30);
         
         sortedHotspots.forEach(hotspot => {
-            if (!hotspot.lat || !hotspot.lng) return; // Skip hotspots without coordinates
+            if (!hotspot.lat || !hotspot.lng) {
+                console.log('Skipping hotspot without coordinates:', hotspot.name);
+                return; // Skip hotspots without coordinates
+            }
+            
+            console.log('Creating hotspot card for:', hotspot.name, 'at', hotspot.lat, hotspot.lng);
             
             const card = document.createElement('div');
             card.className = 'hotspot-card';
