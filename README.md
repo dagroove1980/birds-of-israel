@@ -9,10 +9,12 @@ A beautiful, interactive web application that showcases the fascinating birdlife
 - **Recent Sightings**: View the latest bird observations across Israel
 - **Top Species**: See the most commonly observed bird species
 - **Hotspots**: Discover the best birding locations in Israel
+- **📸 Photo Gallery**: Browse Instagram photos of birds matched to species
 - **Species Search**: Search for specific birds by common or scientific name
 - **Statistics Dashboard**: Real-time stats on observations, species, checklists, and hotspots
 - **Regional Filtering**: Explore different regions of Israel (Jerusalem, Tel Aviv, Haifa, etc.)
 - **Time Range Selection**: Filter observations by time period (1-30 days)
+- **Instagram Integration**: Link your Instagram bird photos to species
 - **Beautiful UI**: Modern, responsive design with smooth animations
 
 ## 🚀 Quick Start

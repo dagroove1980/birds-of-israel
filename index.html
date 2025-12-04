@@ -68,6 +68,7 @@
             <button class="tab-btn active" data-tab="recent">Recent Sightings</button>
             <button class="tab-btn" data-tab="species">Top Species</button>
             <button class="tab-btn" data-tab="hotspots">Hotspots</button>
+            <button class="tab-btn" data-tab="gallery">📸 Photo Gallery</button>
             <button class="tab-btn" data-tab="search">Search Species</button>
         </div>
 
@@ -84,6 +85,15 @@
         <div class="tab-content" id="hotspots-tab">
             <div class="loading" id="hotspots-loading">Loading hotspots...</div>
             <div class="hotspots-list" id="hotspots-list"></div>
+        </div>
+
+        <div class="tab-content" id="gallery-tab">
+            <div class="gallery-info">
+                <p>📸 Browse bird photos from Instagram. Photos are matched to species from recent observations.</p>
+                <p class="gallery-note">💡 <strong>Tip:</strong> Add your Instagram post URLs to <code>photo_mapping.js</code> to link your photos to bird species.</p>
+            </div>
+            <div class="loading" id="gallery-loading">Loading photo gallery...</div>
+            <div class="photo-gallery" id="photo-gallery"></div>
         </div>
 
         <div class="tab-content" id="search-tab">
@@ -113,6 +123,7 @@
 
     <!-- Load config.js first - if it doesn't exist (GitHub Pages), it will fail silently -->
     <script src="config.js"></script>
+    <script src="photo_mapping.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

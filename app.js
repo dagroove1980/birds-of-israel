@@ -60,6 +60,8 @@ function initializeTabs() {
                 loadSpeciesData();
             } else if (targetTab === 'hotspots' && !document.getElementById('hotspots-list').hasChildNodes()) {
                 loadHotspots();
+            } else if (targetTab === 'gallery' && !document.getElementById('photo-gallery').hasChildNodes()) {
+                loadPhotoGallery();
             }
         });
     });
@@ -138,9 +140,22 @@ function createObservationCard(obs) {
         minute: '2-digit'
     });
     
+    // Check if there's a photo for this species
+    const photoUrl = window.PHOTO_MAPPING && window.PHOTO_MAPPING[obs.speciesCode];
+    const photoSection = photoUrl ? `
+        <div class="observation-photo">
+            <a href="${photoUrl}" target="_blank" rel="noopener noreferrer">
+                <div class="photo-placeholder" data-instagram-url="${photoUrl}">
+                    📸 View Photo on Instagram
+                </div>
+            </a>
+        </div>
+    ` : '';
+    
     card.innerHTML = `
         <h3>${obs.comName}</h3>
         <div class="scientific-name">${obs.sciName}</div>
+        ${photoSection}
         <div class="observation-details">
             <div class="detail-item">
                 <span class="detail-label">📍 Location:</span>
@@ -162,6 +177,11 @@ function createObservationCard(obs) {
             ` : ''}
         </div>
     `;
+    
+    // Load Instagram embed if photo exists
+    if (photoUrl) {
+        loadInstagramEmbed(card.querySelector('.photo-placeholder'), photoUrl);
+    }
     
     return card;
 }
@@ -397,5 +417,124 @@ function showError(message) {
     setTimeout(() => {
         errorDiv.remove();
     }, 5000);
+}
+
+// Load Instagram oEmbed
+async function loadInstagramEmbed(container, instagramUrl) {
+    try {
+        // Use Instagram oEmbed API
+        const oembedUrl = `https://api.instagram.com/oembed/?url=${encodeURIComponent(instagramUrl)}&omitscript=true`;
+        const response = await fetch(oembedUrl);
+        
+        if (!response.ok) {
+            throw new Error('Failed to load Instagram embed');
+        }
+        
+        const data = await response.json();
+        
+        // Create embed container
+        const embedDiv = document.createElement('div');
+        embedDiv.className = 'instagram-embed';
+        embedDiv.innerHTML = data.html;
+        embedDiv.style.maxWidth = '100%';
+        
+        // Replace placeholder
+        container.parentElement.replaceChild(embedDiv, container);
+        
+        // Load Instagram's embed script if not already loaded
+        if (!window.instgrm) {
+            const script = document.createElement('script');
+            script.src = 'https://www.instagram.com/embed.js';
+            script.async = true;
+            document.body.appendChild(script);
+        } else {
+            window.instgrm.Embeds.process();
+        }
+    } catch (error) {
+        console.error('Error loading Instagram embed:', error);
+        // Fallback: show link
+        container.innerHTML = `<a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="instagram-link">📸 View on Instagram</a>`;
+    }
+}
+
+// Load photo gallery
+async function loadPhotoGallery() {
+    const container = document.getElementById('photo-gallery');
+    const loading = document.getElementById('gallery-loading');
+    
+    loading.style.display = 'block';
+    container.innerHTML = '';
+    
+    try {
+        // Get recent observations to find species with photos
+        const region = document.getElementById('region').value;
+        const days = document.getElementById('days').value;
+        const observations = await fetchEBirdData(`/data/obs/${region}/recent`, { back: days });
+        
+        // Group by species and find ones with photos
+        const speciesWithPhotos = new Map();
+        
+        observations.forEach(obs => {
+            const photoUrl = window.PHOTO_MAPPING && window.PHOTO_MAPPING[obs.speciesCode];
+            if (photoUrl && !speciesWithPhotos.has(obs.speciesCode)) {
+                speciesWithPhotos.set(obs.speciesCode, {
+                    ...obs,
+                    photoUrl: photoUrl
+                });
+            }
+        });
+        
+        loading.style.display = 'none';
+        
+        if (speciesWithPhotos.size === 0) {
+            container.innerHTML = `
+                <div class="gallery-empty">
+                    <p>📸 No photos mapped yet.</p>
+                    <p>To add your Instagram photos:</p>
+                    <ol>
+                        <li>Open <code>photo_mapping.js</code></li>
+                        <li>Add entries mapping species codes to Instagram post URLs</li>
+                        <li>Format: <code>"speciesCode": "https://www.instagram.com/p/POST_ID/"</code></li>
+                        <li>Refresh this page</li>
+                    </ol>
+                    <p><strong>Example:</strong></p>
+                    <pre><code>window.PHOTO_MAPPING = {
+    "grerhe1": "https://www.instagram.com/p/ABC123XYZ/",
+    "comgra1": "https://www.instagram.com/p/DEF456UVW/"
+};</code></pre>
+                </div>
+            `;
+            return;
+        }
+        
+        // Display photos
+        const photoArray = Array.from(speciesWithPhotos.values());
+        photoArray.forEach(species => {
+            const photoCard = document.createElement('div');
+            photoCard.className = 'photo-card';
+            
+            photoCard.innerHTML = `
+                <div class="photo-card-header">
+                    <h3>${species.comName}</h3>
+                    <div class="scientific-name">${species.sciName}</div>
+                </div>
+                <div class="photo-card-content">
+                    <div class="photo-embed-container" data-instagram-url="${species.photoUrl}">
+                        <div class="photo-loading">Loading photo...</div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(photoCard);
+            
+            // Load Instagram embed
+            const embedContainer = photoCard.querySelector('.photo-embed-container');
+            loadInstagramEmbed(embedContainer, species.photoUrl);
+        });
+        
+    } catch (error) {
+        loading.style.display = 'none';
+        container.innerHTML = `<div class="error">Error loading photo gallery: ${error.message}</div>`;
+    }
 }
 
