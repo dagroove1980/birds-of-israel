@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birds of Israel - eBird Explorer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦅 Birds of Israel</h1>
+            <p class="subtitle">Explore the fascinating birdlife of Israel through eBird data</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="days">Show observations from last:</label>
+                <select id="days">
+                    <option value="1">1 day</option>
+                    <option value="3" selected>3 days</option>
+                    <option value="7">7 days</option>
+                    <option value="14">14 days</option>
+                    <option value="30">30 days</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="region">Region:</label>
+                <select id="region">
+                    <option value="IL" selected>All of Israel</option>
+                    <option value="IL-JM">Jerusalem</option>
+                    <option value="IL-TA">Tel Aviv</option>
+                    <option value="IL-HA">Haifa</option>
+                    <option value="IL-Z">Northern District</option>
+                    <option value="IL-D">Southern District</option>
+                </select>
+            </div>
+            <button id="refreshBtn" class="btn-primary">Refresh Data</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-value" id="totalObservations">-</div>
+                <div class="stat-label">Total Observations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🐦</div>
+                <div class="stat-value" id="totalSpecies">-</div>
+                <div class="stat-label">Species Observed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value" id="totalChecklists">-</div>
+                <div class="stat-label">Checklists</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📍</div>
+                <div class="stat-value" id="totalHotspots">-</div>
+                <div class="stat-label">Hotspots</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="recent">Recent Sightings</button>
+            <button class="tab-btn" data-tab="species">Top Species</button>
+            <button class="tab-btn" data-tab="hotspots">Hotspots</button>
+            <button class="tab-btn" data-tab="search">Search Species</button>
+        </div>
+
+        <div class="tab-content active" id="recent-tab">
+            <div class="loading" id="recent-loading">Loading recent sightings...</div>
+            <div class="observations-grid" id="recent-observations"></div>
+        </div>
+
+        <div class="tab-content" id="species-tab">
+            <div class="loading" id="species-loading">Loading species data...</div>
+            <div class="species-list" id="species-list"></div>
+        </div>
+
+        <div class="tab-content" id="hotspots-tab">
+            <div class="loading" id="hotspots-loading">Loading hotspots...</div>
+            <div class="hotspots-list" id="hotspots-list"></div>
+        </div>
+
+        <div class="tab-content" id="search-tab">
+            <div class="search-container">
+                <input type="text" id="species-search" placeholder="Search for a bird species...">
+                <button id="search-btn" class="btn-primary">Search</button>
+            </div>
+            <div class="search-results" id="search-results"></div>
+        </div>
+
+        <footer>
+            <p>Data provided by <a href="https://ebird.org" target="_blank">eBird</a></p>
+            <p class="api-note">⚠️ Make sure to set your eBird API key in config.js</p>
+        </footer>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+

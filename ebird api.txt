@@ -1,0 +1,142 @@
+﻿eBird API 2.0
+Welcome to the new eBird API Documentation!
+The 2.0 APIs are a replacement for 1.1 APIs, which are now retired.
+All of these APIs (with a few exceptions) will require a key, which is tied to your eBird account. Please sign up for a key on the eBird website.
+The default response format is JSON unless otherwise noted.
+The key should be included in a request header called "x-ebirdapitoken". Alternatively, it can be included as a request parameter named 'key'.
+NOTE: Any response field with 'ID' in all caps such as 'locID' or 'subID' should be considered deprecated and may be removed in the future. Please let us know if such a response exists where no alternative with lowecase 'Id' is available.
+Terms of Use
+Changelog
+v3.3.32.4 2021-09-01
+* Added familyCode to /ref/taxonomy/ebird response
+v3.23 2021-01-21
+* Performance fix for 'Historic observations on a date' endpoint
+* Previously, a path extension (e.g. '.json') was allowed in some requests to specify the response format. This is no longer supported.
+v3.13 2020-12-09
+* product/spplist now accepts any regionCode instead of just locIds
+v2.07 2020-02-06
+* Max distance, if specified, for 'Nearest observations of a species', is now 50km
+v2.06 2020-01-29
+* latestObsDt and numSpeciesAllTime are now always included in ref/hotspot results regardless of presence of 'back' parameter
+* Removed default distance filter for 'Nearest observations of a species', as indicated in docs.
+v 2.04 2020-01-21
+* subId is now included in the 'simple' detail of all 'data/obs' endpoints
+v 2.03
+* 'dist' parameter now accepts double precision
+AUTHORIZATIONAPI Key
+Key
+x-ebirdapitoken
+Value
+{{x-ebirdapitoken}}
+ref/region
+The ref/region end-points return information on regions.
+AUTHORIZATIONAPI Key
+This folder is using API Key from collectioneBird API 2.0
+GETRegion Info
+https://api.ebird.org/v2/ref/region/info/{{regionCode}}
+Get information on the name and geographical area covered by a region.
+URL parameters
+Name
+	Description
+	regionCode
+	The major region, country, subnational1 or subnational2 code, or locId
+	Query parameters
+Name
+	Values
+	Default
+	Description
+	regionNameFormat
+	detailed, detailednoqual, full, namequal, nameonly, revdetailed
+	full
+	Control how the name is displayed.
+	delim
+	(any characters)
+	', '
+	The characters used to separate elements in the name.
+	Notes
+Taking Madison County, New York, USA (location code US-NY-053) as an example the various values for the regionNameFormat query parameter work as follows:
+Value
+	Description
+	Result
+	detailed
+	return a detailed description
+	Madison County, New York, US
+	detailednoqual
+	return the name to the subnational1 level
+	Madison, New York
+	full
+	return the full description
+	Madison, New York, United States
+	namequal
+	return the qualified name
+	Madison County
+	nameonly
+	return only the name of the region
+	Madison
+	revdetailed
+	return the detailed description in reverse
+	US, New York, Madison County
+	AUTHORIZATIONAPI Key
+This request is using API Key from collectioneBird API 2.0
+Example Request
+Vancouver, Detailed Format
+View More
+curl
+curl --location 'https://api.ebird.org/v2/ref/region/info/CA-BC-GV?regionNameFormat=detailed' \
+--header 'X-eBirdApiToken: {{x-ebirdapitoken}}'
+200 OK
+Example Response
+* Body
+* Headers (11)
+View More
+json
+{
+  "bounds": {
+    "minX": -123.432442,
+    "maxX": -122.408264,
+    "minY": 49.001183,
+    "maxY": 49.57455
+  },
+  "result": "Metro Vancouver District, British Columbia, CA",
+  "code": "CA-BC-GV",
+  "type": "subnational2",
+  "parent": {
+    "result": "British Columbia, CA",
+    "code": "CA-BC",
+    "type": "subnational1",
+    "parent": {
+      "result": "Canada",
+      "code": "CA",
+      "type": "country",
+      "longitude": 0,
+      "latitude": 0
+    },
+    "longitude": 0,
+    "latitude": 0
+  },
+  "longitude": -122.920353,
+  "latitude": 49.2878665
+}
+GETSub Region List
+https://api.ebird.org/v2/ref/region/list/{{regionType}}/{{parentRegionCode}}
+Get the list of sub-regions for a given country or region.
+Query parameters
+Name
+	Values
+	Default
+	Description
+	fmt
+	csv, json
+	json
+	Fetch the records in CSV or JSON format.
+	URL parameters
+Name
+	Description
+	regionType
+	The region type: 'country', 'subnational1' or 'subnational2'.
+	parentRegionCode
+	The country or subnational1 code, or 'world'.
+	Notes
+Not all combinations of region type and region code are valid. You can fetch all the subnational1 or subnational2 regions for a country however you can only specify a region type of 'country' when using 'world' as a region code.
+AUTHORIZATIONAPI Key
+This request is using API Key from collectioneBird API 2.0

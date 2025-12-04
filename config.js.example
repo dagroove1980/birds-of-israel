@@ -1,0 +1,8 @@
+// eBird API Configuration
+// 
+// 1. Get your API key from: https://ebird.org/api/keygen
+// 2. Copy this file to config.js
+// 3. Replace 'YOUR_API_KEY_HERE' with your actual API key
+
+window.EBIRD_API_KEY = 'YOUR_API_KEY_HERE';
+
