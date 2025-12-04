@@ -273,9 +273,21 @@ function createMapPreview(lat, lng) {
     const zoom = 15;
     const size = '400x300';
     
-    // Try OpenStreetMap static map service
-    // Format: center=lat,lng&zoom=level&size=widthxheight&markers=lat,lng,icon
-    return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=${zoom}&size=${size}&markers=${lat},${lng},red-pushpin`;
+    // Try multiple OpenStreetMap services for better reliability
+    // Service 1: staticmap.openstreetmap.de (primary)
+    const primaryUrl = `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=${zoom}&size=${size}&markers=${lat},${lng},red-pushpin`;
+    
+    // Service 2: Alternative OSM tile service (fallback)
+    // Using a tile-based approach that's more reliable
+    const tileZoom = Math.min(zoom, 18);
+    const tileSize = 256;
+    const n = Math.pow(2, tileZoom);
+    const x = Math.floor((lng + 180) / 360 * n);
+    const latRad = lat * Math.PI / 180;
+    const y = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n);
+    
+    // Return primary URL - if it fails, the onerror handler will show fallback
+    return primaryUrl;
     
     // Alternative services if the above doesn't work:
     // Option 1: Using Mapbox (requires free API key)
@@ -310,11 +322,14 @@ async function loadHotspots(region = 'IL') {
         
         sortedHotspots.forEach(hotspot => {
             if (!hotspot.lat || !hotspot.lng) {
-                console.log('Skipping hotspot without coordinates:', hotspot.name);
+                console.log('Skipping hotspot without coordinates:', hotspot.locName || hotspot.name);
                 return; // Skip hotspots without coordinates
             }
             
-            console.log('Creating hotspot card for:', hotspot.name, 'at', hotspot.lat, hotspot.lng);
+            // Get hotspot name - eBird API uses 'locName' field
+            const hotspotName = hotspot.locName || hotspot.name || 'Unknown Location';
+            console.log('Creating hotspot card for:', hotspotName, 'at', hotspot.lat, hotspot.lng);
+            console.log('Hotspot data:', hotspot);
             
             const card = document.createElement('div');
             card.className = 'hotspot-card';
@@ -334,10 +349,15 @@ async function loadHotspots(region = 'IL') {
             const mapThumbnail = createMapPreview(hotspot.lat, hotspot.lng);
             
             card.innerHTML = `
-                <h3>${hotspot.name}</h3>
+                <h3>${hotspotName}</h3>
                 <div class="hotspot-map-container">
                     <a href="${googleMapsLink}" target="_blank" rel="noopener noreferrer" class="hotspot-map-link" title="Click to open in Google Maps">
-                        <img src="${mapThumbnail}" alt="Map of ${hotspot.name}" class="hotspot-map-thumbnail" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'%3E%3Crect fill=\'%23f0f0f0\' width=\'400\' height=\'300\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' fill=\'%23999\'%3EMap preview%3C/text%3E%3C/svg%3E';">
+                        <img src="${mapThumbnail}" alt="Map of ${hotspotName}" class="hotspot-map-thumbnail" loading="lazy" 
+                             onerror="console.error('Map image failed:', this.src); this.onerror=null; this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';">
+                        <div class="hotspot-map-fallback" style="display: none; padding: 40px; text-align: center; background: #f0f0f0; border-radius: 8px; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                            <p style="margin: 0 0 10px 0; color: #666;">🗺️ Map preview unavailable</p>
+                            <a href="${googleMapsLink}" target="_blank" rel="noopener noreferrer" class="google-maps-link">View on Google Maps →</a>
+                        </div>
                         <div class="hotspot-map-overlay">
                             <span class="map-link-text">🗺️ Open in Google Maps</span>
                         </div>
